@@ -1,0 +1,4 @@
+build/
+src/secrets.h
+*.o
+.superpowers/

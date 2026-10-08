@@ -58,10 +58,10 @@ other. A queue is the only connection between them.
 
 - Status bar (16 px): Wi-Fi state, current S3 mode parsed from the prompt (`HIZ`, `I2C`, ...), pause indicator.
 - Terminal area (~176 px): 6x8 font, about 53 columns x 22 rows. Sticks to bottom unless scrolled or paused.
-- Button row (48 px, two rows): `mode`, `help`, `scan`, `read`, `write`, `sniff`, `config`, `Enter`. Long press opens a short list of related commands. Fixed defaults in project 1.
+- Button row (48 px, two rows of five): `mode`, `help`, `scan`, `read`, `write`, `sniff`, `config`, `^C`, `KB`, `Enter`. Long press opens a short list of related commands. Fixed defaults in project 1.
 - `KB` button slides a QWERTY keyboard (plus symbols page, Backspace, Enter) over the button row and half the terminal. Keys are sent as typed.
 - Gestures: drag to scroll, tap status bar to pause/resume (output keeps buffering), long-press terminal to clear.
-- Scrollback: about 2000 lines in RAM (constant, can be reduced).
+- Scrollback: 400 lines in RAM (`SCROLLBACK_LINES`). About 2000 lines does not fit next to Wi-Fi on a plain ESP32: 53 columns x 2 bytes x 400 lines = 42 KB.
 - Touch calibration screen at first boot; result saved to flash; hold BOOT at power-up to redo.
 
 ## 5. Error handling
@@ -71,7 +71,7 @@ other. A queue is the only connection between them.
 | Hotspot not found at boot | Status "searching"; retry every few seconds indefinitely. |
 | Link drops mid-session | Status red "link lost"; scrollback kept; `[link lost]` marker line; auto-reconnect. Keys typed while disconnected are dropped, not queued. |
 | Malformed/unknown ANSI | Ignored; no crash or grid corruption. |
-| Receive queue full | Oldest bytes dropped; `[overflow]` marker; UI stays responsive. |
+| Receive queue full | Newly arriving bytes are dropped (a lock-free queue cannot discard from the consumer side); `[overflow]` marker; UI stays responsive. |
 | Touch not calibrated | Calibration screen; BOOT at power-up redoes it. |
 | Flash storage unavailable | Default calibration; keep running. |
 
@@ -86,7 +86,7 @@ other. A queue is the only connection between them.
   4. Command buttons send the right text.
   5. Scroll and pause behave.
   6. Power-cycling the S3 recovers on its own.
-- Done = checklist passes and a 10-minute `sniff` soak shows no crash or visible corruption; free heap is measured during the soak.
+- Done = checklist passes and a 10-minute soak shows no crash or visible corruption; free heap is measured during the soak. The soak is the replay harness at full speed plus the real link idle with periodic `help` dumps (a continuously printing `sniff` source is not available without extra wiring).
 
 ## 7. Build and flashing
 
@@ -99,7 +99,7 @@ Layout:
 ```
 cyd-bitpirate-monitor/
   cyd-bitpirate-monitor.ino
-  src/link.*  ansi.*  termbuf.*  render.*  input.*  ui.*
+  src/link.h replaylink.* wslink.* ansi.* termbuf.* prompt.* calib.* gesture.* layout.* keyboard.* bytering.* render.* input.* ui.*
   test/        host unit tests + captured sessions
   tools/       replay harness, build/flash scripts
   docs/superpowers/specs/
@@ -111,5 +111,5 @@ cyd-bitpirate-monitor/
 2. RAM: Wi-Fi plus scrollback on a plain ESP32 is tight. Scrollback size is a constant to shrink if needed.
 3. Resistive touch accuracy: handled by calibration.
 4. The S3 hotspot may need enabling by hand (`mode wifi`, then `connect`, per the wiki). The plan will include exact steps.
-5. Landscape orientation is assumed; portrait is a possible alternative (not yet confirmed by the user).
+5. Landscape orientation is used (the user approved the spec without asking for portrait).
 6. The Wi-Fi hotspot name/password and whether it is enabled are not yet verified on the actual S3.
