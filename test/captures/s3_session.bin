@@ -1,0 +1,414 @@
+
+HIZ> 
+HIZ> HIZ> h[KHIZ> he[KHIZ> hel[KHIZ> help[K
+
+=== Help Shell: Commands by Mode ===
+
+Select a mode to get help:
+  [1] *  ALL
+  [2]    1WIRE
+  [3]    UART
+  [4]    HDUART
+  [5]    I2C
+  [6]    SPI
+  [7]    2WIRE
+  [8]    3WIRE
+  [9]    DIO
+  [10]   LED
+  [11]   INFRARED
+  [12]   USB
+  [13]   BLUETOOTH
+  [14]   WIFI
+  [15]   JTAG
+  [16]   I2S
+  [17]   CAN
+  [18]   ETHERNET
+  [19]   SUBGHZ
+  [20]   RFID
+  [21]   RF24
+  [22]   FM
+  [23]   CELL
+  [24]   LORA
+  [25]   EXPANDER
+  [26]   Exit
+Enter index (default 1): 
+
+====================================
+General
+====================================
+
+help                 - Show this help
+mode [name]          - Set active mode
+man                  - Show firmware guide
+system               - Show system infos
+profile              - Save/load GPIOs config
+alias                - Create shortcut
+hex [number]         - Convert dec/hex/bin
+logic <gpio>         - Logic analyzer
+analogic <gpio>      - Analogic plotter
+wizard <gpio>        - GPIO activity analyzer
+listen <gpio>        - GPIO activity to audio
+repeat <count> <cmd> - Repeat command
+P                    - Enable pull-up
+p                    - Disable pull-up
+
+Tip: use 'mode' (or 'm').
+
+====================================
+1WIRE
+====================================
+
+scan                 - Scan 1-Wire devices
+ping                 - Ping 1-Wire device
+sniff                - View 1-Wire traffic
+read                 - Read ID + SP
+write id [8 bytes]   - Write device ID
+write sp [8 bytes]   - Write scratchpad
+temp                 - Read temperature
+ibutton              - iButton operations
+eeprom               - EEPROM operations
+config               - Configure settings
+[0xAA r:8] ...       - Instruction syntax
+
+====================================
+UART
+====================================
+
+scan                 - Scan UART lines activity
+autobaud             - Detect baud rate on RX
+ping                 - Send and expect reply
+sniff                - Monitor ascii UART traffic
+sniff raw            - Monitor hex UART traffic
+read                 - Receive ascii data
+raw                  - Receive raw hex data
+write [text]         - Send at current baud
+bridge               - Full-duplex mode
+at                   - AT commands operations
+emulator             - Emulate UART device
+trigger [pattern]    - Send response on pattern
+spam [text] [ms]     - Write text every ms
+xmodem <send> <path> - Send file via XMODEM
+xmodem <recv> <path> - Receive file via XMODEM
+config               - Configure settings
+swap                 - Swap RX and TX GPIOs
+['Hello'] [r:64]...  - Instruction syntax
+
+====================================
+HDUART
+====================================
+
+bridge               - Half-duplex I/O
+config               - Configure settings
+[0x1 D:10 r:255]     - Instruction syntax
+
+====================================
+I2C
+====================================
+
+scan                 - Find devices
+discovery            - Report on devices
+ping <addr>          - Check ACK
+identify <addr>      - Identify device
+sniff                - View traffic
+slave <addr>         - Emulate I2C device
+read <addr> [reg]    - Read register
+write <a> [r] [val]  - Write register
+dump <addr> [len]    - Read all registers
+regs <addr> [len]    - Probe register R/W
+glitch <addr>        - Run attack sequence
+flood <addr>         - Saturate target I/O
+health <addr>        - Perform timing test
+monitor <addr> [ms]  - Monitor register changes
+trace <a> [reg] [ms] - Monitor one register
+eeprom [addr]        - I2C EEPROM operations
+recover              - Attempt bus recovery
+jam                  - Jam I2C bus with noise
+swap                 - Swap SDA and SCL GPIOs
+config               - Configure settings
+[0x13 0x4B 0x1]      - Instruction syntax
+
+====================================
+SPI
+====================================
+
+sniff                - View traffic
+sdcard               - SD operations
+slave                - Emulate SPI slave
+flash                - SPI Flash operations
+eeprom               - SPI EEPROM operations
+config               - Configure settings
+[0x9F r:3]           - Instruction syntax
+
+====================================
+2WIRE
+====================================
+
+sniff                - View 2WIRE traffic
+smartcard            - Smartcard operations
+config               - Configure settings
+[0xAB r:4]           - Instruction syntax
+
+====================================
+3WIRE
+====================================
+
+eeprom               - 3WIRE EEPROM operations
+config               - Configure settings
+
+====================================
+DIO
+====================================
+
+scan                  - Detect pins activity
+pins                  - Show pins state
+sniff <gpio>          - Track toggle states
+read <gpio>           - Get pin state
+set <gpio> <H/L/I/O>  - Set pin state
+pullup <gpio>         - Set pin pullup
+pulldown <gpio>       - Set pin pulldown
+pulse <gpio> <us>     - Send pulse on pin
+servo <gpio> <angle>  - Set servo angle
+pwm <gpio> [frq duty%]- Set PWM on pin
+toggle <gpio> <ms>    - Toggle pin periodically
+measure <gpio> [ms]   - Calculate frequency
+jam <gpio> [min max]  - Random high/low states
+reset <gpio>          - Reset to default
+
+====================================
+LED
+====================================
+
+fill <color>         - Fill all LEDs with a color
+set <index> <color>  - Set specific LED color
+blink                - Blink all LEDs
+rainbow              - Rainbow animation
+chase                - Chasing light effect
+cycle                - Cycle through colors
+wave                 - Wave animation
+reset                - Turn off all LEDs
+setprotocol          - Select LED protocol
+config               - Configure LED settings
+
+====================================
+INFRARED
+====================================
+
+send <dev> sub <cmd> - Send IR signal
+receive              - Receive IR signal
+setprotocol          - Set IR protocol type
+devicebgone          - OFF devices blast
+remote               - Universal remote commands
+replay [count]       - Replay recorded IR frames
+record               - Record IR signals to file
+load                 - Load .ir files from FS
+jam                  - Send random IR signals
+config               - Configure settings
+
+====================================
+USB
+====================================
+
+storage              - Mount SD as USB
+keyboard [text]      - Start keyboard bridge
+mouse [action]       - Mouse move and click
+mouse jiggle [ms]    - Random mouse moves
+gamepad [key]        - Gamepad button press
+sysctrl [action]     - Hardware control actions
+host                 - Connect device to ESP32
+adapters             - Dedicated USB adapters
+reset                - Reset interface
+config               - Configure settings
+
+====================================
+BLUETOOTH
+====================================
+
+scan                 - Discover devices
+pair <mac>           - Pair with a device
+sniff                - Sniff Bluetooth data
+spoof <mac>          - Spoof mac address
+status               - Show current status
+server               - Create an HID server
+keyboard [text]      - Start keyboard bridge
+mouse [action]       - Move and click mouse
+mouse jiggle [ms]    - Random mouse moves
+reset                - Reset interface
+
+====================================
+WIFI
+====================================
+
+scan                 - List Wi-Fi networks
+connect              - Connect to a network
+ping <host>          - Ping a remote host
+discovery [timeout]  - Discover network devices
+sniff                - Monitor Wi-Fi packets
+waterfall            - Show channel activity
+probe                - Search for net access
+repeater             - Forward Wi-Fi traffic
+spoof ap <mac>       - Spoof AP MAC
+spoof sta <mac>      - Spoof Station MAC
+status               - Show Wi-Fi status
+deauth [ssid]        - Deauthenticate hosts
+disconnect           - Disconnect from Wi-Fi
+ap <ssid> <password> - Set access point
+spam                 - Spam random beacons
+flood [channel]      - Flood channel with packets
+ssh [h] [u] [pw] [p] - Open SSH session
+telnet <host> [port] - Open telnet session
+nc <host> <port>     - Open netcat session
+nmap <h> [-p ports]  - Scan host ports
+modbus <host> [port] - Modbus TCP operations
+http get <url>       - HTTP(s) GET request
+http analyze <url>   - Get analysis report
+lookup mac|ip <addr> - Lookup MAC or IP address
+webui                - Show the web UI IP
+reset                - Reset interface
+
+====================================
+JTAG
+====================================
+
+scan swd             - Scan SWD pins
+scan jtag            - Scan JTAG pins
+openocd              - Reboot into OpenOCD adapter
+config               - Configure settings
+
+====================================
+I2S
+====================================
+
+play <freq> [ms]     - Play sine wave for ms
+record               - Read mic continuously
+test <speaker|mic>   - Run basic audio tests
+reset                - Reset to default
+config               - Configure settings
+
+====================================
+CAN (MCP2515)
+====================================
+
+sniff                - Print all received frames
+send [id]            - Send frame with given ID
+receive [id]         - Capture frames with ID
+status               - State of the CAN controller
+config               - Configure MCP2515 settings
+
+====================================
+ETHERNET (W5500)
+====================================
+
+connect              - Connect using DHCP
+status               - Show ETH status
+ping <host>          - Ping a remote host
+discovery [timeout]  - Discover network devices
+ssh [h] [u] [pw] [p] - Open SSH session
+telnet <host> [port] - Open telnet session
+nc <host> <port>     - Open netcat session
+nmap <h> [-p ports]  - Scan host ports
+modbus <host> [port] - Modbus TCP operations
+http get <url>       - HTTP(s) GET request
+http analyze <url>   - Get analysis report
+lookup mac|ip <addr> - Lookup MAC or IP address
+reset                - Reset interface
+config               - Configure W5500 settings
+
+====================================
+SUBGHZ (CC1101)
+====================================
+
+scan                 - Search best frequency
+sweep                - Analyze frequency band
+send <payload> [te]  - Send a frame payload
+receive              - Receive raw/decoded signals
+replay               - Record and replay frames
+jam                  - Jam selected frequencies
+bruteforce           - Bruteforce 12 bit keys
+trace                - Observe RX signal trace
+waterfall            - Show frequency peaks
+record               - Record frame to .sub file
+load                 - Load .sub files from FS
+ear                  - RSSI to audio mapping
+setfrequency         - Set operating frequency
+config               - Configure CC1101 settings
+
+====================================
+RFID (PN532)
+====================================
+
+read                 - Read RFID tag data
+write                - Write UID/Block to tag
+clone                - Clone Mifare UID
+erase                - Erase RFID tag
+config               - Configure PN532 settings
+
+====================================
+RF24 (NRF24L01)
+====================================
+
+scan                 - Search best active channel
+send                 - Send a frame payload
+receive              - Receive frames
+sweep                - Analyze channels activity
+jam                  - Jam selected channels group
+waterfall            - Show channel peaks
+setchannel           - Set operating channel
+config               - Configure NRF24 settings
+
+====================================
+FM (SI4713)
+====================================
+
+sweep                - Analyze frequencies
+trace [freq]         - Observe frequency signal
+waterfall            - Show frequency peaks
+broadcast            - Create FM station
+reset                - Reset via pin
+config               - Configure Si4713 settings
+
+====================================
+CELL (SIMCOM)
+====================================
+
+modem                - Show modem info
+network              - Show network info
+operator             - Show available operators
+sim                  - Show SIM card info
+unlock               - Unlock SIM with PIN
+phonebook            - Show SIM phonebook
+sms                  - SMS operations
+call                 - Call operations
+ussd [code]          - Send USSD code
+setmode              - Set modem mode
+config               - Configure modem settings
+
+====================================
+LORA (SX1262)
+====================================
+
+send [payload]      - Send text or hex{ AA }
+spam [payload] [ms] - Repeat packet every ms
+jam [seconds]       - Lab CW for 1..60 seconds
+receive             - Listen for packets
+record              - Receive and save packet
+load                - Send saved .lora packet
+rssi [ms]           - Monitor RSSI On channel
+ear                 - Map RSSI to audio
+scan                - Scan and find best frequency
+waterfall           - Show frequency activity
+cad [ms]            - Monitor activity on channel
+airtime [bytes]     - Airtime for 1..255 bytes
+setfreq [MHz]       - Set operating frequency
+status              - Show profile and counters
+meshtastic          - Open Meshtastic shell
+config              - Configure LoRa SX1262
+
+====================================
+EXPANDER
+====================================
+
+This mode bridges to a expander over UART.
+The expander acts as a radio expansion module.
+https://github.com/geo-tp/ESP32-Bus-Expander
+
+HIZ> 
