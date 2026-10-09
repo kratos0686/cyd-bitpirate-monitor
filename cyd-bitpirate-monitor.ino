@@ -1,23 +1,9 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
-#include "src/ansi.h"
-#include "src/bytering.h"
-#include "src/capture_data.h"
-#include "src/config.h"
-#include "src/render.h"
-#include "src/replaylink.h"
-#include "src/termbuf.h"
+#include "src/input.h"
 
 static TFT_eSPI tft;
-static TermBuf term;
-static AnsiParser ansi(term);
-static ByteRing rx(RX_RING_BYTES);
-static Renderer renderer(tft);
-#ifdef REPLAY_LOOP
-static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, true);
-#else
-static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, false);
-#endif
+static TouchInput touch;
 
 void setup() {
   Serial.begin(115200);
@@ -30,18 +16,17 @@ void setup() {
   tft.init();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
-  s3link.begin();
+  touch.begin();
+  pinMode(0, INPUT_PULLUP);                           // BOOT button held at power-up = recalibrate
+  if (!touch.hasCalibration() || digitalRead(0) == LOW) touch.runCalibration(tft);
+  tft.drawCentreString("Touch anywhere", 160, 110, 2);
 }
 
 void loop() {
-  static uint32_t lastDraw = 0, lastHeap = 0;
-  s3link.loop();
-  uint8_t buf[256]; size_t n;
-  while ((n = rx.pop(buf, sizeof buf)) > 0) ansi.feed(buf, n);
-  uint32_t now = millis();
-  if (now - lastDraw >= 33) { renderer.draw(term, (now / 500) % 2 == 0); lastDraw = now; }
-  if (now - lastHeap >= 10000) {
-    Serial.printf("heap free=%u min=%u\n", ESP.getFreeHeap(), ESP.getMinFreeHeap());
-    lastHeap = now;
+  TouchSample s = touch.read();
+  if (s.pressed) {
+    tft.fillCircle(s.x, s.y, 3, TFT_GREEN);
+    Serial.printf("touch %d,%d\n", s.x, s.y);
   }
+  delay(5);
 }
