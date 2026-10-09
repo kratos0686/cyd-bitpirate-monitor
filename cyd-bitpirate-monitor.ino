@@ -1,30 +1,47 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
+#include "src/ansi.h"
+#include "src/bytering.h"
+#include "src/capture_data.h"
 #include "src/config.h"
+#include "src/render.h"
+#include "src/replaylink.h"
+#include "src/termbuf.h"
 
-TFT_eSPI tft;
+static TFT_eSPI tft;
+static TermBuf term;
+static AnsiParser ansi(term);
+static ByteRing rx(RX_RING_BYTES);
+static Renderer renderer(tft);
+#ifdef REPLAY_LOOP
+static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, true);
+#else
+static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, false);
+#endif
 
 void setup() {
   Serial.begin(115200);
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, HIGH);
-  // Workaround (core 3.3.11 + TFT_eSPI 2.5.43): the SPI bus set up inside the first init() never
-  // reaches the panel, so restart the bus and init again. See docs/hardware.md.
+  // Init workaround, see docs/hardware.md
   tft.init();
   tft.getSPIinstance().end();
   tft.getSPIinstance().begin(TFT_SCLK, TFT_MISO, TFT_MOSI, -1);
   tft.init();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
-  tft.fillRect(0, 0, 80, 40, TFT_RED);
-  tft.fillRect(80, 0, 80, 40, TFT_GREEN);
-  tft.fillRect(160, 0, 80, 40, TFT_BLUE);
-  tft.fillRect(240, 0, 80, 40, TFT_WHITE);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawString("CYD OK 320x240", 4, 48, 2);
-  tft.drawRect(0, TERM_Y, COLS * CHAR_W, TERM_H, TFT_YELLOW);   // outline of the 53x22 terminal area
-  tft.drawRect(0, BTN_Y, SCREEN_W, BTN_H, TFT_CYAN);            // outline of the button row
-  Serial.println("display up");
+  s3link.begin();
 }
 
-void loop() {}
+void loop() {
+  static uint32_t lastDraw = 0, lastHeap = 0;
+  s3link.loop();
+  uint8_t buf[256]; size_t n;
+  while ((n = rx.pop(buf, sizeof buf)) > 0) ansi.feed(buf, n);
+  uint32_t now = millis();
+  if (now - lastDraw >= 33) { renderer.draw(term, (now / 500) % 2 == 0); lastDraw = now; }
+  if (now - lastHeap >= 10000) {
+    Serial.printf("heap free=%u min=%u\n", ESP.getFreeHeap(), ESP.getMinFreeHeap());
+    lastHeap = now;
+  }
+}
