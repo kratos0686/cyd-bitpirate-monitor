@@ -3,12 +3,16 @@
 #include <string.h>
 #include "src/ansi.h"
 #include "src/bytering.h"
+#ifdef REPLAY_MODE
 #include "src/capture_data.h"
+#include "src/replaylink.h"
+#else
+#include "src/wslink.h"
+#endif
 #include "src/config.h"
 #include "src/gesture.h"
 #include "src/input.h"
 #include "src/render.h"
-#include "src/replaylink.h"
 #include "src/termbuf.h"
 #include "src/ui.h"
 
@@ -16,7 +20,15 @@ static TFT_eSPI tft;
 static TermBuf term;
 static AnsiParser ansi(term);
 static ByteRing rx(RX_RING_BYTES);
+#ifdef REPLAY_MODE
+#ifdef REPLAY_LOOP
+static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, true);
+#else
 static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, false);
+#endif
+#else
+static WsLink s3link(rx);
+#endif
 static Renderer renderer(tft);
 static TouchInput touch;
 static GestureRecognizer gestures;
@@ -44,7 +56,7 @@ void setup() {
   if (!touch.hasCalibration() || digitalRead(0) == LOW) touch.runCalibration(tft);
   ui.begin();
   s3link.begin();
-  xTaskCreatePinnedToCore(linkTask, "link", 4096, nullptr, 1, nullptr, 0);
+  xTaskCreatePinnedToCore(linkTask, "link", 8192, nullptr, 1, nullptr, 0);
 }
 
 void loop() {
