@@ -1,4 +1,5 @@
 #include "check.h"
+#include <string.h>
 #include "termbuf.h"
 #include <fstream>
 #include <iterator>
@@ -36,4 +37,20 @@ SUITE(capture_tests) {
   CHECK(t->totalLines() > SCROLLBACK_LINES);   // proves the ring wrapped on real data
   CHECK(sawPrompt);
   CHECK(allPrintable);
+}
+
+// Frames captured from the S3 web CLI (WebSocket /ws, Task 13): the S3 redraws the whole line on every keystroke.
+SUITE(web_cli_stream_tests) {
+  auto t = std::make_unique<TermBuf>();
+  AnsiParser p(*t);
+  const char* frames[] = {"\n", "HIZ> ", "\rHIZ> a\x1b[K", "\rHIZ> ab\x1b[K", "\rHIZ> a \x1b[K", "\x1b[D"};
+  for (const char* f : frames) p.feed((const uint8_t*)f, strlen(f));
+  std::string row;
+  for (int c = 0; c < 8; c++) row += t->cellAt(t->cursorRow(), c).ch;
+  CHECK(row.substr(0, 6) == "HIZ> a");     // 'b' was erased by DEL
+  CHECK_EQ(t->cellAt(t->cursorRow(), 6).ch, ' ');
+  CHECK_EQ(t->cursorCol(), 6);                           // cursor sits just after 'a'
+  const char* nl = "\n";
+  p.feed((const uint8_t*)nl, 1);
+  CHECK_EQ(t->cursorCol(), 0);                           // bare LF acts as CR+LF
 }
