@@ -18,9 +18,16 @@ bool TouchInput::readRaw(int& rx, int& ry) {
 }
 
 TouchSample TouchInput::read() {
-  int rx, ry;
-  if (!readRaw(rx, ry)) return TouchSample{false, 0, 0};
-  return TouchSample{true, mapAxis(cal_.x, rx, 0, SCREEN_W - 1), mapAxis(cal_.y, ry, 0, SCREEN_H - 1)};
+  int xs[5], ys[5], n = 0;
+  if (!readRaw(xs[0], ys[0])) return TouchSample{false, 0, 0};        // idle: no extra delay
+  n = 1;
+  for (int tries = 0; tries < 8 && n < 5; tries++) {                  // resistive panel is noisy: take the median of 5
+    delay(3);                                                         // the XPT2046 library re-samples at most every 3 ms
+    if (readRaw(xs[n], ys[n])) n++;
+  }
+  if (n < 3) return TouchSample{false, 0, 0};                         // too few valid samples: treat as a glitch
+  return TouchSample{true, mapAxis(cal_.x, medianOf(xs, n), 0, SCREEN_W - 1),
+                           mapAxis(cal_.y, medianOf(ys, n), 0, SCREEN_H - 1)};
 }
 
 void TouchInput::load() {

@@ -1,9 +1,32 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
+#include <string.h>
+#include "src/ansi.h"
+#include "src/bytering.h"
+#include "src/capture_data.h"
+#include "src/config.h"
+#include "src/gesture.h"
 #include "src/input.h"
+#include "src/render.h"
+#include "src/replaylink.h"
+#include "src/termbuf.h"
+#include "src/ui.h"
 
 static TFT_eSPI tft;
+static TermBuf term;
+static AnsiParser ansi(term);
+static ByteRing rx(RX_RING_BYTES);
+static ReplayLink s3link(rx, CAPTURE, CAPTURE_LEN, false);
+static Renderer renderer(tft);
 static TouchInput touch;
+static GestureRecognizer gestures;
+static Ui ui(tft, term, renderer, s3link);
+
+static void feedText(const char* s) { ansi.feed((const uint8_t*)s, strlen(s)); }
+
+static void linkTask(void*) {
+  for (;;) { s3link.loop(); vTaskDelay(1); }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -17,16 +40,37 @@ void setup() {
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
   touch.begin();
-  pinMode(0, INPUT_PULLUP);                           // BOOT button held at power-up = recalibrate
+  pinMode(0, INPUT_PULLUP);                                   // hold BOOT at power-up to recalibrate
   if (!touch.hasCalibration() || digitalRead(0) == LOW) touch.runCalibration(tft);
-  tft.drawCentreString("Touch anywhere", 160, 110, 2);
+  ui.begin();
+  s3link.begin();
+  xTaskCreatePinnedToCore(linkTask, "link", 4096, nullptr, 1, nullptr, 0);
 }
 
 void loop() {
-  TouchSample s = touch.read();
-  if (s.pressed) {
-    tft.fillCircle(s.x, s.y, 3, TFT_GREEN);
-    Serial.printf("touch %d,%d\n", s.x, s.y);
+  static LinkState prev = LinkState::Searching;
+  static uint32_t lastHeap = 0;
+  uint32_t now = millis();
+
+  LinkState st = s3link.state();
+  if (st != prev) {
+    if (st == LinkState::Lost) feedText("\r\n[link lost]\r\n");
+    else if (st == LinkState::Connected) feedText("\r\n[link up]\r\n");
+    prev = st;
   }
-  delay(5);
+
+  uint8_t buf[256]; size_t n;
+  while ((n = rx.pop(buf, sizeof buf)) > 0) ansi.feed(buf, n);
+  size_t dropped = rx.takeDropped();
+  if (dropped) feedText("\r\n[overflow]\r\n");
+
+  TouchSample s = touch.read();
+  ui.handle(gestures.update(s.pressed, s.x, s.y, now));
+  ui.update(now);
+
+  if (now - lastHeap >= 10000) {
+    Serial.printf("heap free=%u min=%u\n", ESP.getFreeHeap(), ESP.getMinFreeHeap());
+    lastHeap = now;
+  }
+  delay(1);
 }
