@@ -52,8 +52,17 @@ void setup() {
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
   touch.begin();
-  pinMode(0, INPUT_PULLUP);                                   // hold BOOT at power-up to recalibrate
-  if (!touch.hasCalibration() || digitalRead(0) == LOW) touch.runCalibration(tft);
+  // BOOT (GPIO0) is a strapping pin: held at power-up it enters download mode.
+  // So offer a 2 s window after start where holding it forces recalibration.
+  pinMode(0, INPUT_PULLUP);
+  bool recal = !touch.hasCalibration();
+  if (!recal) {
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("Hold BOOT to recalibrate", 60, 112, 2);
+    for (uint32_t t0 = millis(); millis() - t0 < 2000 && !recal;) recal = digitalRead(0) == LOW;
+    tft.fillScreen(TFT_BLACK);
+  }
+  if (recal) touch.runCalibration(tft);
   ui.begin();
   s3link.begin();
   xTaskCreatePinnedToCore(linkTask, "link", 8192, nullptr, 1, nullptr, 0);
