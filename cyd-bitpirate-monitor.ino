@@ -93,5 +93,9 @@ void loop() {
     Serial.printf("heap free=%u min=%u\n", ESP.getFreeHeap(), ESP.getMinFreeHeap());
     lastHeap = now;
   }
+#ifdef SOAK_HELP
+  static uint32_t lastHelp = 0;
+  if (now - lastHelp >= 20000) { lastHelp = now; s3link.send((const uint8_t*)"help\r", 5); }
+#endif
   delay(1);
 }
