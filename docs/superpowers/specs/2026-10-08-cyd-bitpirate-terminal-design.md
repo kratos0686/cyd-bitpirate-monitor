@@ -62,7 +62,7 @@ other. A queue is the only connection between them.
 - `KB` button slides a QWERTY keyboard (plus symbols page, Backspace, Enter) over the button row and half the terminal. Keys are sent as typed.
 - Gestures: drag to scroll, tap status bar to pause/resume (output keeps buffering), long-press terminal to clear.
 - Scrollback: 400 lines in RAM (`SCROLLBACK_LINES`). About 2000 lines does not fit next to Wi-Fi on a plain ESP32: 53 columns x 2 bytes x 400 lines = 42 KB.
-- Touch calibration screen at first boot; result saved to flash; hold BOOT at power-up to redo.
+- Touch calibration screen at first boot; result saved to flash; hold BOOT during the 2 s "Hold BOOT to recalibrate" prompt after start to redo (BOOT held at power-up enters download mode).
 
 ## 5. Error handling
 
@@ -72,7 +72,7 @@ other. A queue is the only connection between them.
 | Link drops mid-session | Status red "link lost"; scrollback kept; `[link lost]` marker line; auto-reconnect. Keys typed while disconnected are dropped, not queued. |
 | Malformed/unknown ANSI | Ignored; no crash or grid corruption. |
 | Receive queue full | Newly arriving bytes are dropped (a lock-free queue cannot discard from the consumer side); `[overflow]` marker; UI stays responsive. |
-| Touch not calibrated | Calibration screen; BOOT at power-up redoes it. |
+| Touch not calibrated | Calibration screen; BOOT during the post-start prompt redoes it. |
 | Flash storage unavailable | Default calibration; keep running. |
 
 ## 6. Testing
