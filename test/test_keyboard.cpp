@@ -20,8 +20,17 @@ SUITE(keyboard_tests) {
   k = kb.hit(16, 121);           CHECK_EQ(k.ch, '1');
   k = kb.hit(2, 172 + 5);        CHECK(k.type == KeyType::Page);
   k = kb.hit(200, 211);          CHECK(k.type == KeyType::Char);      CHECK_EQ(k.ch, '#');   // x 192..223
+  kb.setPage(0);
+  kb.setCaseToggle(true);
+  CHECK_STR(kb.key(28).label, "Aa");
+  kb.setCaps(true);
+  CHECK_STR(kb.key(28).label, "ABC");
+  k = kb.hit(16, 121);           CHECK(k.type == KeyType::Char);      CHECK_EQ(k.ch, 'Q');
 
-  for (int page = 0; page < 2; page++) {
+  kb.setPage(2);
+  CHECK_EQ(kb.page(), 2);
+  k = kb.hit(16, 121);           CHECK(k.type == KeyType::Char);      CHECK_EQ(k.ch, '!');
+  for (int page = 0; page < 3; page++) {
     kb.setPage(page);
     for (int i = 0; i < kb.keyCount(); i++) {
       const KeyRect& a = kb.key(i);
