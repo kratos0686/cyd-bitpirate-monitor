@@ -4,6 +4,7 @@
 Keyboard::Keyboard(int x, int y, int w, int h) : x_(x), y_(y), w_(w), h_(h) { build(); }
 
 void Keyboard::setPage(int p) { page_ = p ? 1 : 0; build(); }
+void Keyboard::setCaps(bool caps) { caps_ = caps; build(); }
 
 Key Keyboard::hit(int px, int py) const {
   for (int i = 0; i < count_; i++) {
@@ -32,13 +33,18 @@ void Keyboard::build() {
       acc += hu;
     };
     auto chars = [&](const char* s) {
-      for (; *s; s++) { char l[2] = {*s, 0}; put(2, KeyType::Char, *s, l); }
+      for (; *s; s++) {
+        char ch = *s;
+        if (caps_ && ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 'A');
+        char l[2] = {ch, 0};
+        put(2, KeyType::Char, ch, l);
+      }
     };
     if (page_ == 0) {
       if (r == 0) chars("qwertyuiop");
       else if (r == 1) { acc = 1; chars("asdfghjkl"); }
       else if (r == 2) { put(3, KeyType::Page, 0, "123"); chars("zxcvbnm"); put(3, KeyType::Backspace, 0, "<-"); }
-      else { put(3, KeyType::CtrlC, 0, "^C"); put(3, KeyType::Hide, 0, "KB"); put(10, KeyType::Space, ' ', "spc"); put(4, KeyType::Enter, 0, "Ent"); }
+      else { put(3, KeyType::CtrlC, 0, caps_ ? "ABC" : "^C"); put(3, KeyType::Hide, 0, "KB"); put(10, KeyType::Space, ' ', "spc"); put(4, KeyType::Enter, 0, "Ent"); }
     } else {
       if (r == 0) chars("1234567890");
       else if (r == 1) chars("-_/\\.,:;=+");

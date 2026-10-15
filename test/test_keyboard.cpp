@@ -20,6 +20,9 @@ SUITE(keyboard_tests) {
   k = kb.hit(16, 121);           CHECK_EQ(k.ch, '1');
   k = kb.hit(2, 172 + 5);        CHECK(k.type == KeyType::Page);
   k = kb.hit(200, 211);          CHECK(k.type == KeyType::Char);      CHECK_EQ(k.ch, '#');   // x 192..223
+  kb.setPage(0);
+  kb.setCaps(true);
+  k = kb.hit(16, 121);           CHECK(k.type == KeyType::Char);      CHECK_EQ(k.ch, 'Q');
 
   for (int page = 0; page < 2; page++) {
     kb.setPage(page);
