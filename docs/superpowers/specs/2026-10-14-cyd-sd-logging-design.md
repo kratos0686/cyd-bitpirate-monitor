@@ -12,7 +12,7 @@ the CYD, and view or replay them on screen.
 In scope:
 - Manual REC button; one binary session file per recording
 - Timestamps (milliseconds since REC started), both directions recorded
-- LOGS browser (list, open, delete), read-only viewer with timestamp margin
+- LOGS browser (list of the newest 20 files, open, delete), read-only viewer; tap a terminal line to see its timestamp
 - Timed replay (1x, 4x, 16x, pause, stop) into the viewer
 - Host tool to convert a session file to text on a PC
 
@@ -72,9 +72,12 @@ Recording:
   one second of data.
 
 LOGS browser and viewer:
-- LOGS opens a full-screen list: name, size, duration, newest first, drag to scroll.
-- Tapping a file opens the viewer: a read-only terminal with a header bar (name, timestamp
-  margin toggle, play, speed, stop, back, delete).
+- LOGS opens a full-screen list of the newest 20 files: name, size, duration, newest first, drag to scroll.
+- Tapping a file opens the viewer: a read-only terminal with a header bar (file name, state, time)
+  and a control row (play/pause, speed, stop, delete, back). Tapping a terminal line shows that
+  line's timestamp in the header (a 53-column line leaves no room for a timestamp margin).
+- The main button row becomes 12 buttons in a 6x2 grid; REC and LOGS are the two new ones at
+  the end. Button width is 53 px (the last column is 55 px).
 - The viewer has its own 400-line buffer, so live data and recording continue in the
   background and the live screen is unchanged when leaving the viewer.
 - The viewer shows the last 400 lines of a session. Older lines of a longer session are not
