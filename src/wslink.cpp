@@ -160,8 +160,7 @@ void WsLink::loop() {
     state_ = (uint8_t)(wasConnected_ ? LinkState::Lost : LinkState::Searching);
     if (wsStarted_) { ws_.disconnect(); wsStarted_ = false; }
     uint8_t junk[32]; while (tx_.pop(junk, sizeof junk) > 0) {}
-    bool scanBusy = scanInProgress_ || scanRequested_.load();      // restarting the join would abort the Wi-Fi settings scan
-    if (!scanBusy && millis() - lastWifiTry_ >= 5000) {
+    if (millis() - lastWifiTry_ >= 5000) {
       WiFi.disconnect();
       WiFi.begin(ssid_, password_);
       lastWifiTry_ = millis();
