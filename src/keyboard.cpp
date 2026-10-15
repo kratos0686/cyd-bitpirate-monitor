@@ -3,8 +3,9 @@
 
 Keyboard::Keyboard(int x, int y, int w, int h) : x_(x), y_(y), w_(w), h_(h) { build(); }
 
-void Keyboard::setPage(int p) { page_ = p ? 1 : 0; build(); }
+void Keyboard::setPage(int p) { page_ = p < 0 ? 0 : (p > 2 ? 2 : p); build(); }
 void Keyboard::setCaps(bool caps) { caps_ = caps; build(); }
+void Keyboard::setCaseToggle(bool enabled) { caseToggle_ = enabled; build(); }
 
 Key Keyboard::hit(int px, int py) const {
   for (int i = 0; i < count_; i++) {
@@ -44,11 +45,17 @@ void Keyboard::build() {
       if (r == 0) chars("qwertyuiop");
       else if (r == 1) { acc = 1; chars("asdfghjkl"); }
       else if (r == 2) { put(3, KeyType::Page, 0, "123"); chars("zxcvbnm"); put(3, KeyType::Backspace, 0, "<-"); }
-      else { put(3, KeyType::CtrlC, 0, caps_ ? "ABC" : "^C"); put(3, KeyType::Hide, 0, "KB"); put(10, KeyType::Space, ' ', "spc"); put(4, KeyType::Enter, 0, "Ent"); }
-    } else {
+      else { put(3, KeyType::CtrlC, 0, caseToggle_ ? (caps_ ? "ABC" : "Aa") : "^C"); put(3, KeyType::Hide, 0, "KB"); put(10, KeyType::Space, ' ', "spc"); put(4, KeyType::Enter, 0, "Ent"); }
+    } else if (page_ == 1) {
       if (r == 0) chars("1234567890");
       else if (r == 1) chars("-_/\\.,:;=+");
-      else if (r == 2) { put(3, KeyType::Page, 0, "abc"); chars("[]<>|&\""); put(3, KeyType::Backspace, 0, "<-"); }
+      else if (r == 2) { put(3, KeyType::Page, 0, "More"); chars("[]<>|&\""); put(3, KeyType::Backspace, 0, "<-"); }
+      else { put(3, KeyType::CtrlC, 0, "^C"); put(3, KeyType::Hide, 0, "KB"); put(6, KeyType::Space, ' ', "spc");
+             put(2, KeyType::Char, '#', "#"); put(2, KeyType::Char, '@', "@"); put(4, KeyType::Enter, 0, "Ent"); }
+    } else {
+      if (r == 0) chars("!$%'()*?^`");
+      else if (r == 1) chars("{}~");
+      else if (r == 2) { put(3, KeyType::Page, 0, "abc"); chars("!$%^*()"); put(3, KeyType::Backspace, 0, "<-"); }
       else { put(3, KeyType::CtrlC, 0, "^C"); put(3, KeyType::Hide, 0, "KB"); put(6, KeyType::Space, ' ', "spc");
              put(2, KeyType::Char, '#', "#"); put(2, KeyType::Char, '@', "@"); put(4, KeyType::Enter, 0, "Ent"); }
     }

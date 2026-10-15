@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 #include <WebSocketsClient.h>
 #include <atomic>
 #include "bytering.h"

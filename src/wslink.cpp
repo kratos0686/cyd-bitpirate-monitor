@@ -3,16 +3,18 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Preferences.h>
+#include <string.h>
 #include "secrets.h"
 
 void WsLink::begin() {
   Preferences prefs;
-  prefs.begin("cyd-wifi", false);
   strncpy(ssid_, WS_SSID, sizeof ssid_ - 1);
   strncpy(password_, WS_PASS, sizeof password_ - 1);
-  prefs.getString("ssid", ssid_, sizeof ssid_);
-  prefs.getString("password", password_, sizeof password_);
-  prefs.end();
+  if (prefs.begin("cyd-wifi", false)) {
+    prefs.getString("ssid", ssid_, sizeof ssid_);
+    prefs.getString("password", password_, sizeof password_);
+    prefs.end();
+  }
 
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(false);             // loop() owns reconnects so the reported state stays accurate
@@ -40,6 +42,9 @@ void WsLink::begin() {
 
 void WsLink::scanWifiNetworks() {
   if (scanState_.load() == (uint8_t)WifiScanState::Scanning) return;
+  portENTER_CRITICAL(&networkMux_);
+  networkCount_ = 0;
+  portEXIT_CRITICAL(&networkMux_);
   scanState_ = (uint8_t)WifiScanState::Scanning;
   scanRequested_ = true;
 }

@@ -16,8 +16,10 @@ public:
   void update(uint32_t nowMs);
 
 private:
+  enum class WifiScreen : uint8_t { None, Networks, Password, Connecting };
   void onTap(int x, int y);
   void onLongPress(int x, int y);
+  void onWifiTap(int x, int y);
   void doKey(Key k);
   void sendText(const char* s);
   void sendByte(uint8_t b);
@@ -29,6 +31,12 @@ private:
   void drawButtons();
   void drawKeyboard();
   void drawPopup();
+  void openWifiScreen();
+  void closeWifiScreen();
+  void drawWifiScreen();
+  void drawWifiPassword();
+  void drawWifiActions(const char* left, const char* right);
+  void enterWifiPassword();
 
   TFT_eSPI& tft_;
   TermBuf& term_;
@@ -37,6 +45,10 @@ private:
   Keyboard kb_;
   bool kbOpen_ = false;
   int popupBtn_ = -1;
+  WifiScreen wifiScreen_ = WifiScreen::None;
+  char wifiSsid_[33] = {0}, wifiPassword_[64] = {0};
+  bool wifiCaps_ = false, wifiSawDisconnect_ = false;
+  int wifiScroll_ = 0, shownWifiCount_ = -1, shownScanState_ = -1, shownWifiLink_ = -1;
   char mode_[16] = {0};
   int shownLink_ = -1, shownRight_ = -1;
   char shownMode_[16] = {0};

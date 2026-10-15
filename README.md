@@ -11,7 +11,10 @@ Project 1 of 5: the core terminal only (no hex view, logging or protocol decoder
 - Auto-join and reconnect to the S3 hotspot (`[link lost]` / `[link up]` markers, scrollback kept)
 - Minimal ANSI terminal: 400-line scrollback, line editing as the S3 redraws it
 - Touch UI: 10 command buttons (`mode help scan read write sniff config ^C KB Enter`), QWERTY
-  keyboard, drag to scroll, tap the status bar to pause, long-press to clear
+  keyboard, drag to scroll, tap the status bar to pause, long-press it for Wi-Fi settings or the
+  terminal to clear
+- Change Wi-Fi without reflashing: long-press the status bar to scan, select a network, and enter
+  its password; the selected credentials are saved in ESP32 flash and used for reconnects
 - Status bar shows link state and the current S3 mode parsed from the prompt
 - Touch calibration saved to flash; hold BOOT during the 2 s "Hold BOOT to recalibrate" prompt
   after start to redo it (BOOT held at power-up enters download mode instead)
@@ -30,6 +33,11 @@ tools/run-tests.sh                        # host unit tests, no hardware needed
 `src/secrets.h` is git-ignored. Display pins and a required TFT_eSPI init workaround are in
 `docs/hardware.md`. The S3 side (hotspot from the boot menu, WebSocket `/ws`, echo behavior) is in
 `docs/protocol.md`.
+
+To switch networks, long-press the status bar, tap **SCAN**, choose a network, and enter its
+password with the on-screen keyboard. Use **Aa** to toggle letter case, **123** and **More** to
+cycle through number/symbol keys, **Ent** to connect, or **KB** to cancel. Credentials are stored
+in the ESP32's NVS and take precedence over `WS_SSID`/`WS_PASS` on subsequent boots.
 
 Debug builds: `EXTRA_FLAGS="-DREPLAY_MODE=1 -DREPLAY_LOOP=1" tools/build.sh` replays a captured S3
 session with no Wi-Fi; `-DSOAK_HELP=1` sends `help` every 20 s for soak testing.
